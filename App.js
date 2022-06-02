@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import "react-native-gesture-handler"
 import {
   SafeAreaView,
   ScrollView,
@@ -11,9 +12,9 @@ import {
   LogBox,
 } from "react-native";
 import { useDimensions, useDeviceOrientation } from "@react-native-community/hooks";
-LogBox.ignoreLogs([
-  "[react-native-gesture-handler] Seems like you\'re using an old API with gesture components, check out new Gestures system!",
-]);
+// LogBox.ignoreLogs([
+//   "[react-native-gesture-handler] Seems like you\'re using an old API with gesture components, check out new Gestures system!",
+// ]);
 
 //Navigation
 import { NavigationContainer } from "@react-navigation/native";
@@ -111,9 +112,9 @@ export default App = () => {
           headerMode="screen"
         >
           <Drawer.Screen name="Home" component={HomeStack} />
-          {/* <Drawer.Screen name="Music" component={Music} /> */}
-          {/* <Drawer.Screen name="Videos" component={Videos} initialParams={{ fullscreen: fullscreen }} /> */}
-          {/* <Drawer.Screen name="Profile" component={ProfileStack} /> */}
+          <Drawer.Screen name="Music" component={Music} />
+          <Drawer.Screen name="Videos" component={Videos} initialParams={{ fullscreen: fullscreen }} />
+          <Drawer.Screen name="Profile" component={ProfileStack} />
         </Drawer.Navigator>
       </NavigationContainer>
     </>
