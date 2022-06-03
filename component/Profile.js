@@ -21,6 +21,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     top: "0%",
     flex: 1,
-    padding: 20,
+    marginHorizontal: 20,
   },
 });

@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import Video from "react-native-video";
 import Slider from '@react-native-community/slider';
+import Icon from "react-native-vector-icons/Ionicons";
 import SystemNavigationBar from "react-native-system-navigation-bar";
 import { useDimensions, useDeviceOrientation } from "@react-native-community/hooks";
 import {
@@ -35,7 +36,7 @@ export default Videos = ({ route }) => {
   const [fullscreen, setFullscreen] = useState()
   const [controlsVisible, setControlsVisible] = useState(false)
   const [initializing, setInitializing] = useState(true)
-
+  const iconSize = Dimensions.get("screen").height / 20
   const orientation = useDeviceOrientation();
   const handleFullscreen = async () => {
     if (orientation.landscape === true) {
@@ -138,23 +139,41 @@ export default Videos = ({ route }) => {
                 <TouchableOpacity style={styles.ivb} onPress={() => {
                   handleShowControls();
                   handleBackward10();
-                }} />
+                }} >
+                  <Icon name={"ios-play-back"} size={iconSize} color={"white"} />
+                </TouchableOpacity>
                 <TouchableOpacity style={styles.ivb} onPress={() => {
                   handleShowControls();
                   handlePlay();
-                }} />
+                }} >
+                  {!paused ? <Icon name={"ios-pause"} size={iconSize} color={"white"} /> : <Icon name={"ios-play"} size={iconSize} color={"white"} />}
+                </TouchableOpacity>
                 <TouchableOpacity style={styles.ivb} onPress={() => {
                   handleShowControls();
                   handleForward10();
-                }} />
+                }} >
+                  <Icon name={"ios-play-forward"} size={iconSize} color={"white"} />
+                </TouchableOpacity>
               </View>
-              {/* <Slider
+              <Slider
                 style={{ position: "absolute", bottom: "3%", width: "100%", height: 40 }}
                 minimumValue={0}
                 maximumValue={vidPlayer.seekableDuration}
-                minimumTrackTintColor="#FFFFFF"
-                maximumTrackTintColor="#000000"
-              /> */}
+                value={vidPlayer.currentTime}
+                onSlidingStart={() => {
+                  setPaused(true)
+                  clearTimeout(this.timer)
+                  setControlsVisible(true)
+                }}
+                onSlidingComplete={(value) => {
+                  ref.seek(value)
+                  handleShowControls();
+                  setPaused(false)
+                }}
+                thumbTintColor="#53e639"
+                minimumTrackTintColor="#53e639"
+                maximumTrackTintColor="#FFFFFF"
+              />
               <View />
             </View> : <></>}
           </TouchableOpacity>
@@ -176,7 +195,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   button: {},
-  ivb: { position: "relative", width: "20%", height: "40%", backgroundColor: "green", padding: '5%', margin: '5%', alignSelf: "center" },
+  ivb: {
+    position: "relative",
+    padding: '5%',
+    marginHorizontal: '5%',
+    alignSelf: "center"
+  },
   backgroundVideo: {
     display: "flex",
     flex: 1,

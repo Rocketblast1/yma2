@@ -12,6 +12,8 @@ import {
     LogBox,
 } from "react-native";
 import TrackPlayer, { State, useProgress } from 'react-native-track-player';
+import Slider from '@react-native-community/slider';
+import Icon from "react-native-vector-icons/Ionicons";
 // import { 
 // 	auth as SpotifyAuth, 
 // 	remote as SpotifyRemote, 
@@ -46,7 +48,7 @@ const SongLst = ({ songs }) => {
             contentContainerStyle={styles.ccs}
         >
             {songs.map((item, index) => (
-                <TouchableOpacity key={index}>
+                <TouchableOpacity key={index} style={{margin: 10}}>
                     <View style={styles.songBackground}>
                         <View style={styles.songCenter}>
                             <Text
@@ -71,6 +73,7 @@ const SongLst = ({ songs }) => {
 export default Music = () => {
     const { position, buffered, duration } = useProgress()
     const [songs, setSongs] = useState();
+    const [playing, setPlaying] = useState(false)
     const setUpTrackPlayer = async () => {
         try {
             await TrackPlayer.setupPlayer();
@@ -80,7 +83,7 @@ export default Music = () => {
             console.log(e)
         }
     }
-    
+
 
     useEffect(() => {
         setUpTrackPlayer();
@@ -88,35 +91,57 @@ export default Music = () => {
     }, [])
 
     return (
-        <View style={{ flex: 1, alignContent: "center", justifyContent: "center" }}>
-            <View style={{ alignSelf: "center", justifyContent: "center" }}>
-                <Text>
-                    {position}
-                </Text>
-                <Text>
-                    {duration}
-                </Text>
-                <TouchableOpacity style={{ backgroundColor: "red", width: "100%", height: 50 }} onPress={() => {
-                    TrackPlayer.play();
-                }} >
-                    <Text> Play </Text>
+        <View style={{ flex: 1, alignContent: "center", justifyContent: "center", backgroundColor: "pink", }}>
+            <Text style={{ textAlign: "center" }}>
+                {position}
+            </Text>
+            <Text style={{ textAlign: "center" }}>
+                {duration}
+            </Text>
+            <Slider
+                style={{ height: 40, marginHorizontal: 40 }}
+                maximumValue={duration}
+                value={position}
+                onSlidingStart={()=>{
+                    TrackPlayer.pause()
+                }}
+                onSlidingComplete={(value)=>{
+                    TrackPlayer.play()
+                    TrackPlayer.seekTo(value)
+                }}
+                thumbTintColor="#53e639"
+                minimumTrackTintColor="#53e639"
+                maximumTrackTintColor="#FFFFFF"
+            />
+            <View style={{ alignSelf: "center", justifyContent: "center", flexDirection: "row" }}>
+                {/* Rewind Button */}
+                <TouchableOpacity style={{ backgroundColor: "red", height: 50, padding: 10 }} onPress={() => TrackPlayer.seekTo(0)} onLongPress={() => TrackPlayer.skipToPrevious()} >
+                    <Icon name={"ios-play-back"} size={25} color={"white"} />
                 </TouchableOpacity>
-                <TouchableOpacity style={{ backgroundColor: "red", width: "100%", height: 50 }} onPress={() => {
-                    TrackPlayer.pause();
+                {/* Play Button */}
+                <TouchableOpacity style={{ backgroundColor: "red", height: 50, padding: 10 }} onPress={async () => {
+                    const state = await TrackPlayer.getState();
+                    if (state === State.Playing) {
+                        setPlaying(false)
+                        TrackPlayer.pause();
+                    };
+
+                    if (state === State.Paused) {
+                        setPlaying(true)
+                        TrackPlayer.play();
+                    };
                 }} >
-                    <Text> Pause </Text>
+                    {playing ? <Icon name={"ios-pause"} size={25} color={"white"} /> : <Icon name={"ios-play"} size={25} color={"white"} />}
                 </TouchableOpacity>
-                <TouchableOpacity style={{ backgroundColor: "red", width: "100%", height: 50 }} onPress={() => {
+                <TouchableOpacity style={{ backgroundColor: "red", height: 50, padding: 10 }} onPress={() => {
                     TrackPlayer.skipToNext();
                 }}>
-                    <Text> Next Track </Text>
+                    <Icon name={"ios-play-forward"} size={25} color={"white"} />
                 </TouchableOpacity>
-                <TouchableOpacity style={{ backgroundColor: "red", width: "100%", height: 50 }} onPress={() => TrackPlayer.seekTo(0)} onLongPress={() => TrackPlayer.skipToPrevious()} >
-                    <Text>Rewind / Previous Track </Text>
-                </TouchableOpacity>
-                <View style={{ flex: 1 }}>
-                    {songs ? (<SongLst songs={songs} />) : (<></>)}
-                </View>
+
+            </View>
+            <View style={{ flex: 1 }}>
+                {songs ? (<SongLst songs={songs} />) : (<></>)}
             </View>
         </View>
     )
@@ -129,12 +154,12 @@ const styles = StyleSheet.create({
     songBackground: {
         flex: 1,
         flexDirection: "column",
-        margin: 10,
+        marginVertical: 10,
         backgroundColor: "orange",
         alignItems: "center",
         justifyContent: "center",
-        height: Dimensions.get("screen").height / 22.2,
-        width: Dimensions.get("screen").height / 22.2,
+        // height: Dimensions.get("screen").height / 10,
+        // width: Dimensions.get("screen").height / 22.2,
         borderRadius: Dimensions.get("screen").height / 20 / 6,
     },
     songCenter: {
@@ -145,7 +170,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         height: Dimensions.get("screen").height / 20,
-        width: Dimensions.get("screen").height / 20,
+        // width: Dimensions.get("screen").height / 20,
         borderRadius: Dimensions.get("screen").height / 25 / 4,
     },
 });
