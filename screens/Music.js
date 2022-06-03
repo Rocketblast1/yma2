@@ -48,7 +48,9 @@ const SongLst = ({ songs }) => {
             contentContainerStyle={styles.ccs}
         >
             {songs.map((item, index) => (
-                <TouchableOpacity key={index} style={{margin: 10}}>
+                <TouchableOpacity key={index} style={{margin: 10}} onPress={()=>{
+                    TrackPlayer.skip(index)
+                }}>
                     <View style={styles.songBackground}>
                         <View style={styles.songCenter}>
                             <Text
