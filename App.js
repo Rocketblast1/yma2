@@ -9,6 +9,7 @@ import {
   StyleSheet,
   Text,
   View,
+  ActivityIndicator,
   LogBox,
 } from "react-native";
 import { useDimensions, useDeviceOrientation } from "@react-native-community/hooks";
@@ -31,6 +32,7 @@ import Music from "./screens/Music";
 import Profile from "./component/Profile";
 import HomeStack from "./stacks/HomeStack";
 import LOGIN_SIGNUP_STACK from "./stacks/ProfileStack";
+const SubsciberContext = React.createContext();
 
 
 
@@ -63,7 +65,7 @@ export default App = () => {
   }
 
   //Loading Screen
-  if (initializing) return null;
+  if (initializing) return <ActivityIndicator size="large" color="#53e639" />;
 
   //Login Navigator
   if (!user)
@@ -87,7 +89,7 @@ export default App = () => {
             headerTitleAlign: "center",
             headerStyle: {
               backgroundColor: "#53e639",
-              height: 55,
+              height: 40,
             },
             drawerStyle: {
               backgroundColor: "#53e639",
@@ -111,10 +113,10 @@ export default App = () => {
           })}
           headerMode="screen"
         >
-          <Drawer.Screen name="Home" component={HomeStack} />
+          {/* <Drawer.Screen name="Home" component={HomeStack} /> */}
           <Drawer.Screen name="Music" component={Music} />
-          <Drawer.Screen name="Videos" component={Videos} initialParams={{ fullscreen: fullscreen }} />
-          <Drawer.Screen name="Profile" component={ProfileStack} />
+          {/* <Drawer.Screen name="Videos" component={Videos} initialParams={{ fullscreen: fullscreen }} /> */}
+          {/* <Drawer.Screen name="Profile" component={ProfileStack} /> */}
         </Drawer.Navigator>
       </NavigationContainer>
     </>

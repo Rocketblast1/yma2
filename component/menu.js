@@ -10,7 +10,7 @@ export default menu = ({ navigation }) => {
         navigation.openDrawer();
       }}
     >
-      <Icon name={"menu"} size={25} color={"white"} />
+      <Icon name={"menu"} size={30} color={"white"} />
     </TouchableOpacity>
   );
 };
@@ -21,7 +21,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     top: "0%",
     flex: 1,
-    height: 40,
     marginHorizontal: 20,
   },
 });

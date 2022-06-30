@@ -1,7 +1,6 @@
 import * as React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 import { StyleSheet, View, Text, TouchableOpacity, Modal } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
 import HomeScreen from "../screens/HomeScreen";
 
 

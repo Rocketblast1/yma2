@@ -16,19 +16,19 @@ export default function HomeScreen() {
     {
       title: "Boom Box Bois",
       intro: "These bois just cant get enough of their anime",
-      uri: require("../gg.png"),
+      uri: require("../assets/gg.png"),
       key: "1",
     },
     {
       title: "Girl Problems",
       intro: "Why the bois need boi days",
-      uri: require("../GreenhouseGaming.jpg"),
+      uri: require("../assets/GreenhouseGaming.jpg"),
       key: "2",
     },
     {
       title: "Yung Men Lifestyle",
       intro: "Take an inside look at the Yung Men",
-      uri: require("../gg.png"),
+      uri: require("../assets/gg.png"),
       key: "3",
     },
   ]);
@@ -41,7 +41,7 @@ export default function HomeScreen() {
       data={cards}
       renderItem={({ item }) => (
         <View style={styles.tc}>
-          <Card title={item.title} intro={item.intro} />
+          <Card title={item.title} intro={item.intro} source={item.uri} />
         </View>
       )}
     />
