@@ -68,23 +68,26 @@ export default Music = () => {
     const isSetup = useRef(false)
     const [tracks, setTracks] = useState([])
     const [ltracks, setLTracks] = useState([])
-    const getSong = async (title, filename, artwork) => {
+    const queueSong = async (title, filename, artwork) => {
+        let song = {
+            id: new Date().valueOf(),
+            url: "",
+            title: title,
+            artwork: {uri: ""}
+        }
         try {
-            var song = {
-                id: new Date().valueOf(),
-                url: storage().ref(filename).getDownloadURL().then((url) => {
-                    console.log(url)
-                }),
-                title: title,
-                artwork: storage().ref(artwork).getDownloadURL().then((url) => {
-                    console.log(url.toString())
-                })
-            }
-            await TrackPlayer.add(song);
-            setQueuedSongs(await TrackPlayer.getQueue())
+            await storage().ref(filename).getDownloadURL().then((url) => {
+                song.url = url
+
+            })
+            await storage().ref(artwork).getDownloadURL().then((url) => {
+                song.artwork.uri = url
+            })
         } catch (e) {
             console.log(e)
         }
+        await TrackPlayer.add(song)
+        setQueuedSongs(await TrackPlayer.getQueue())
     }
 
     const setUpTrackPlayer = async () => {
@@ -155,7 +158,7 @@ export default Music = () => {
                         horizontal={true}
                         renderItem={({ item }) => (
                             <Button onPress={async () => {
-                                getSong(item.title, item.filename, item.artwork)
+                                queueSong(item.title, item.filename, item.artwork)
                             }} title={item.title} style={{ height: 50, flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: "green" }}>
                             </Button>
                         )}
