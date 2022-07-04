@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import "react-native-gesture-handler"
 import {
   SafeAreaView,
   ScrollView,
@@ -9,7 +8,6 @@ import {
   StyleSheet,
   Text,
   View,
-  ActivityIndicator,
   LogBox,
 } from "react-native";
 import { useDimensions, useDeviceOrientation } from "@react-native-community/hooks";
@@ -28,11 +26,12 @@ import auth from "@react-native-firebase/auth";
 import Menu from "./component/menu";
 import Nav from "./component/navBar";
 import Videos from "./screens/Videos";
-import Music from "./screens/Music";
 import Profile from "./component/Profile";
+
+//Stacks
 import HomeStack from "./stacks/HomeStack";
 import LOGIN_SIGNUP_STACK from "./stacks/ProfileStack";
-const SubsciberContext = React.createContext();
+import MusicStack from "./stacks/MusicStack";
 
 
 
@@ -47,7 +46,7 @@ export default App = () => {
     if (orientation.landscape === true) {
       setFullscreen(true)
       StatusBar.setHidden(true)
-    } 
+    }
     if(orientation.portrait === true){
       setFullscreen(false)
     }
@@ -65,7 +64,7 @@ export default App = () => {
   }
 
   //Loading Screen
-  if (initializing) return <ActivityIndicator size="large" color="#53e639" />;
+  if (initializing) return null;
 
   //Login Navigator
   if (!user)
@@ -89,7 +88,7 @@ export default App = () => {
             headerTitleAlign: "center",
             headerStyle: {
               backgroundColor: "#53e639",
-              height: 40,
+              height: 55,
             },
             drawerStyle: {
               backgroundColor: "#53e639",
@@ -114,7 +113,7 @@ export default App = () => {
           headerMode="screen"
         >
           {/* <Drawer.Screen name="Home" component={HomeStack} /> */}
-          <Drawer.Screen name="Music" component={Music} />
+          <Drawer.Screen name="Music" component={MusicStack} />
           {/* <Drawer.Screen name="Videos" component={Videos} initialParams={{ fullscreen: fullscreen }} /> */}
           {/* <Drawer.Screen name="Profile" component={ProfileStack} /> */}
         </Drawer.Navigator>

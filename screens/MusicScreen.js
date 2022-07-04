@@ -58,7 +58,7 @@ const SongLst = ({ songs }) => {
 
 // ------------------------TODO:
 
-export default Music = () => {
+export default MusicScreen = ({navigation}) => {
     const { position, buffered, duration } = useProgress()
     const [queuedSongs, setQueuedSongs] = useState()
     const [initializing, setInitializing] = useState(true)
@@ -166,7 +166,9 @@ export default Music = () => {
                 </View>
                 {queuedSongs ? (<SongLst songs={queuedSongs} />) : (<></>)}
             </View>
-
+<Button title="Browse Music" onPress={()=>{
+    navigation.navigate("BrowseScreen")
+}}/>
             <View style={styles.playerControlsContainer}>
                 <Slider
                     style={{ height: 40, marginHorizontal: 40 }}
