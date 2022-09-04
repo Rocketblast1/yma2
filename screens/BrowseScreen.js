@@ -9,7 +9,6 @@ import {
   Dimensions,
 } from "react-native";
 import Card from "../component/card";
-// import Videos from "./videos";
 
 export default function BrowseScreen() {
     //Store songs array

@@ -34,7 +34,7 @@ export default MusicStack = () => {
         cardStyleInterpolator: CardStyleInterpolators.forVerticalIOS,
       }}
     >
-      <Stack.Screen name="Music" component={MusicScreen} />
+      <Stack.Screen name="MusicScreen" component={MusicScreen} />
       <Stack.Screen name="BrowseScreen" component={BrowseScreen} />
     </Stack.Navigator>
   );

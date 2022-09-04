@@ -20,7 +20,7 @@ export default Signin = ({ navigation }) => {
   useEffect(() => {
     const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
     return subscriber; // unsubscribe on unmount
-  }, []);
+  }, [user]);
 
   function onAuthStateChanged(user) {
     setUser(user);
@@ -33,19 +33,28 @@ export default Signin = ({ navigation }) => {
 
   if (initializing) return null;
 
+  if (user) {
+    return (<Text>
+      Logged In
+    </Text>)
+  }
+
   if (!user) {
     return (
       <Formik
         initialValues={{ email: "", password: "" }}
-        onSubmit={(values) => {
-          auth()
-            .signInWithEmailAndPassword(values.email, values.password)
-            .catch((error) => {
-              console.log(error.code);
-              console.log(error.message);
-            });
-          auth().onAuthStateChanged(onAuthStateChanged);
+        onSubmit={async (values) => {
+          try {
+            auth().signInWithEmailAndPassword(values.email, values.password)
+          } catch (e) {
+            console.log(e);
+          }
+
+          // .catch((error) => {
+          //   console.log(error.message);
+          // });
         }}
+
       >
         {({
           handleChange,
