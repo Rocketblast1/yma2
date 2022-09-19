@@ -11,7 +11,8 @@ import {
 import Card from "../component/card";
 // import Videos from "./videos";
 
-export default function BrowseScreen() {
+export default function BrowseScreen({trackPlayerInstance}) {
+    const songs = [{id: 1, name: "Song 1"}, {id: 2, name: "Song 2"}]
     //Store songs array
     useEffect(() => {
         //get firebase info and store it into array
@@ -19,7 +20,9 @@ export default function BrowseScreen() {
 
     }
     }, [])
+const handleAddSong = () => {
 
+}
 
   return (
     <ScrollView
@@ -27,7 +30,9 @@ export default function BrowseScreen() {
     nestedScrollEnabled
     contentContainerStyle={styles.ccs}
 >
-    {}
+    {songs.map((item, index) => (
+        <Card title={item.name} onPress={handleAddSong(index)}/>
+    ))}
 </ScrollView>
   );
 }

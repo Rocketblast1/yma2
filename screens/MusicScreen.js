@@ -21,9 +21,8 @@ import FoundationIcon from "react-native-vector-icons/Foundation";
 import storage from '@react-native-firebase/storage';
 import firestore from '@react-native-firebase/firestore';
 import 'react-native-get-random-values';
-import { v1 as uuidv1 } from 'uuid';
 
-const iconSize = 30
+const iconSize = 30;
 
 const SongLst = ({ songs }) => {
     return (

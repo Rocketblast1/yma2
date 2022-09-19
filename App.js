@@ -32,6 +32,7 @@ import Profile from "./component/Profile";
 import HomeStack from "./stacks/HomeStack";
 import LOGIN_SIGNUP_STACK from "./stacks/ProfileStack";
 import MusicStack from "./stacks/MusicStack";
+import TrackPlayer, { State, useProgress } from 'react-native-track-player';
 
 
 
@@ -41,7 +42,7 @@ export default App = () => {
   const [user, setUser] = useState();
   const [fullscreen, setFullscreen] = useState();
   const { width, height } = useDimensions().screen
-  const orientation = useDeviceOrientation()
+  const orientation = useDeviceOrientation();
   const handleFullscreen = async () => {
     if (orientation.landscape === true) {
       setFullscreen(true)
