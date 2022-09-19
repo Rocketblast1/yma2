@@ -45,7 +45,10 @@ const SongLst = ({ songs }) => {
                             </Text>
                         </View>
                         <View style={styles.songButtonContainer}>
-                            <FoundationIcon name={"x"} size={iconSize} color={"white"} />
+                            <FoundationIcon name={"x"} size={iconSize} color={"white"} onPress={()=>{
+                                TrackPlayer.remove(index)
+                                songs.splice(index, 1)
+                            }} />
                             <IonIcon name={"heart-outline"} size={iconSize} color={"white"} />
                         </View>
                     </View>
@@ -57,7 +60,7 @@ const SongLst = ({ songs }) => {
 
 // ------------------------TODO:
 
-export default MusicScreen = ({navigation}) => {
+export default MusicScreen = ({ navigation }) => {
     const { position, buffered, duration } = useProgress()
     const [queuedSongs, setQueuedSongs] = useState()
     const [initializing, setInitializing] = useState(true)
@@ -72,7 +75,7 @@ export default MusicScreen = ({navigation}) => {
             id: new Date().valueOf(),
             url: "",
             title: title,
-            artwork: {uri: ""}
+            artwork: { uri: "" }
         }
         try {
             await storage().ref(filename).getDownloadURL().then((url) => {
@@ -123,12 +126,16 @@ export default MusicScreen = ({navigation}) => {
         const subscriber = firestore()
             .collection('Songs')
             .onSnapshot((querySnapshot) => {
-                querySnapshot.forEach(documentSnapshot => {
-                    ltracks.push({
-                        ...documentSnapshot.data(),
-                        key: documentSnapshot.id,
+                try {
+                    querySnapshot.forEach(documentSnapshot => {
+                        ltracks.push({
+                            ...documentSnapshot.data(),
+                            key: documentSnapshot.id,
+                        });
                     });
-                });
+                } catch (e) {
+                    console.log(e)
+                }
             });
 
         return () => {
@@ -152,6 +159,7 @@ export default MusicScreen = ({navigation}) => {
             {/* Queue */}
             <View style={styles.queueContainer}>
                 <View >
+                    {/* Song Selection Area */}
                     <FlatList
                         data={ltracks}
                         horizontal={true}
@@ -165,9 +173,9 @@ export default MusicScreen = ({navigation}) => {
                 </View>
                 {queuedSongs ? (<SongLst songs={queuedSongs} />) : (<></>)}
             </View>
-<Button title="Browse Music" onPress={()=>{
-    navigation.navigate("BrowseScreen")
-}}/>
+            <Button title="Browse Music" onPress={() => {
+                navigation.navigate("BrowseScreen")
+            }} />
             <View style={styles.playerControlsContainer}>
                 <Slider
                     style={{ height: 40, marginHorizontal: 40 }}

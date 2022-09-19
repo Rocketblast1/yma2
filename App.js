@@ -48,7 +48,7 @@ export default App = () => {
       setFullscreen(true)
       StatusBar.setHidden(true)
     }
-    if(orientation.portrait === true){
+    if (orientation.portrait === true) {
       setFullscreen(false)
     }
   }
@@ -73,6 +73,9 @@ export default App = () => {
       <NavigationContainer style={{}}>
         <LOGIN_SIGNUP_STACK />
       </NavigationContainer>
+      // <Text>
+      //   {console.log(auth().onAuthStateChanged(onAuthStateChanged))}
+      // </Text>
     );
 
   return (

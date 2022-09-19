@@ -9,7 +9,6 @@ import {
   Dimensions,
 } from "react-native";
 import Card from "../component/card";
-// import Videos from "./videos";
 
 export default function BrowseScreen({trackPlayerInstance}) {
     const songs = [{id: 1, name: "Song 1"}, {id: 2, name: "Song 2"}]
