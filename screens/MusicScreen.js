@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext, createContext } from "react";
 import {
     SafeAreaView,
     ScrollView,
@@ -20,20 +20,22 @@ import IonIcon from "react-native-vector-icons/Ionicons";
 import FoundationIcon from "react-native-vector-icons/Foundation";
 import storage from '@react-native-firebase/storage';
 import firestore from '@react-native-firebase/firestore';
-import 'react-native-get-random-values';
-
+import { TrackContext } from "../component/trackContext";
+import useQueue from "../hooks/useQueue";
 const iconSize = 30;
 
-const SongLst = ({ songs }) => {
+const SongLst = ({songs}) => {
+    const Player = useContext(TrackContext)
+    const [queuedSongs, updateTrackQueue] = useQueue()
     return (
         <ScrollView
             style={{}}
             nestedScrollEnabled
             contentContainerStyle={styles.ccs}
         >
-            {songs.map((item, index) => (
+            {queuedSongs.map((item, index) => (
                 <TouchableOpacity key={index} style={{ margin: 10, }} activeOpacity={0.85} onPress={() => {
-                    TrackPlayer.skip(index)
+                    Player.skip(index)
                 }}>
                     {/* Song Container */}
                     <View style={styles.songContainer}>
@@ -46,8 +48,8 @@ const SongLst = ({ songs }) => {
                         </View>
                         <View style={styles.songButtonContainer}>
                             <FoundationIcon name={"x"} size={iconSize} color={"white"} onPress={()=>{
-                                TrackPlayer.remove(index)
-                                songs.splice(index, 1)
+                                Player.remove(index)
+                                queuedSongs.splice(index, 1)
                             }} />
                             <IonIcon name={"heart-outline"} size={iconSize} color={"white"} />
                         </View>
@@ -62,14 +64,17 @@ const SongLst = ({ songs }) => {
 
 export default MusicScreen = ({ navigation }) => {
     const { position, buffered, duration } = useProgress()
-    const [queuedSongs, setQueuedSongs] = useState()
+    const [queuedSongs, updateTrackQueue] = useQueue()
+    // const [queuedSongs, setQueuedSongs] = useState();
     const [initializing, setInitializing] = useState(true)
     const [playing, setPlaying] = useState(false)
     const [modalOpen, setModalOpen] = useState(false)
     const [volume, setVolume] = useState()
-    const isSetup = useRef(false)
-    const [tracks, setTracks] = useState([])
+    // const [tracks, setTracks] = useState([])
     const [ltracks, setLTracks] = useState([])
+    const isSetup = useRef(false)
+    const Player = useContext(TrackContext)
+
     const queueSong = async (title, filename, artwork) => {
         let song = {
             id: new Date().valueOf(),
@@ -88,16 +93,15 @@ export default MusicScreen = ({ navigation }) => {
         } catch (e) {
             console.log(e)
         }
-        await TrackPlayer.add(song)
-        setQueuedSongs(await TrackPlayer.getQueue())
+        await Player.add(song)
+        updateTrackQueue()
     }
 
     const setUpTrackPlayer = async () => {
         try {
-            await TrackPlayer.setupPlayer();
-            await TrackPlayer.add(tracks);
-            setQueuedSongs(await TrackPlayer.getQueue())
-            setVolume(TrackPlayer.getVolume())
+            await Player.setupPlayer();
+            // await Player.add(tracks);
+            // setVolume(Player.getVolume())
         } catch (e) {
             console.log(e)
         }
@@ -106,15 +110,15 @@ export default MusicScreen = ({ navigation }) => {
     }
 
     const handlePlay = async () => {
-        const state = await TrackPlayer.getState();
+        const state = await Player.getState();
         if (state === State.Playing) {
             setPlaying(false)
-            TrackPlayer.pause();
+            Player.pause();
         };
 
         if (state === State.Paused) {
             setPlaying(true)
-            TrackPlayer.play();
+            Player.play();
         };
     }
 
@@ -124,26 +128,29 @@ export default MusicScreen = ({ navigation }) => {
             setUpTrackPlayer();
         }
         const subscriber = firestore()
-            .collection('Songs')
-            .onSnapshot((querySnapshot) => {
-                try {
-                    querySnapshot.forEach(documentSnapshot => {
-                        ltracks.push({
-                            ...documentSnapshot.data(),
-                            key: documentSnapshot.id,
-                        });
-                    });
-                } catch (e) {
-                    console.log(e)
-                }
-            });
+        .collection('Songs')
+        .onSnapshot((querySnapshot) => {
+            try {
+                querySnapshot.forEach(documentSnapshot => {
+                    ltracks.push({
+                        ...documentSnapshot.data(),
+                        key: documentSnapshot.id,
+                    })
+
+                });
+            } catch (e) {
+                console.log(e)
+            } finally {
+                setInitializing(false)
+            }
+        });
 
         return () => {
             isSetup.current = false
-            TrackPlayer.destroy()
-            subscriber();
+            Player.destroy()
+            subscriber()
         }
-    }, [isSetup, tracks])
+    }, [isSetup])
 
     if (initializing) {
         return (<View style={{ flex: 1, backgroundColor: "red" }}>
@@ -182,12 +189,14 @@ export default MusicScreen = ({ navigation }) => {
                     maximumValue={duration}
                     value={position}
                     onSlidingStart={() => {
-                        TrackPlayer.pause()
+                        setPlaying(false)
+                        Player.pause()   
                     }}
                     step={0.01}
                     onSlidingComplete={(value) => {
-                        TrackPlayer.seekTo(value)
-                        TrackPlayer.play()
+                        Player.seekTo(value)
+                        setPlaying(true)
+                        Player.play()
                     }}
                     thumbTintColor="#53e639"
                     minimumTrackTintColor="#53e639"
@@ -212,7 +221,7 @@ export default MusicScreen = ({ navigation }) => {
                     flexDirection: "row"
                 }}>
                     {/* Rewind Button */}
-                    <TouchableOpacity activeOpacity={0.85} style={styles.playerButton} onPress={() => TrackPlayer.seekTo(0)} onLongPress={() => TrackPlayer.skipToPrevious()} >
+                    <TouchableOpacity activeOpacity={0.85} style={styles.playerButton} onPress={() => Player.seekTo(0)} onLongPress={() => Player.skipToPrevious()} >
                         <IonIcon name={"ios-play-back"} size={iconSize} color={"white"} />
                     </TouchableOpacity>
                     {/* Play Button */}
@@ -221,7 +230,7 @@ export default MusicScreen = ({ navigation }) => {
                     </TouchableOpacity>
                     {/* Next Button */}
                     <TouchableOpacity activeOpacity={0.85} style={styles.playerButton} onPress={() => {
-                        TrackPlayer.skipToNext();
+                        Player.skipToNext();
                     }}>
                         <IonIcon name={"ios-play-forward"} size={iconSize} color={"white"} />
                     </TouchableOpacity>
@@ -231,7 +240,7 @@ export default MusicScreen = ({ navigation }) => {
                     value={0}
                     step={0.01}
                     onValueChange={(value) => {
-                        TrackPlayer.setVolume(value)
+                        Player.setVolume(value)
                     }}
                     thumbTintColor="#53e639"
                     minimumTrackTintColor="#53e639"

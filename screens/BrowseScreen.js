@@ -1,39 +1,101 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
-  StyleSheet,
-  View,
-  Text,
-  FlatList,
-  ScrollView,
-  TouchableOpacity,
-  Dimensions,
+    StyleSheet,
+    View,
+    Text,
+    FlatList,
+    ScrollView,
+    TouchableOpacity,
+    Dimensions,
+    Button,
 } from "react-native";
 import Card from "../component/card";
+import storage from '@react-native-firebase/storage';
+import firestore from '@react-native-firebase/firestore';
+import { TrackContext } from "../component/trackContext";
+import useQueue from "../hooks/useQueue";
 
-export default function BrowseScreen({trackPlayerInstance}) {
-    const songs = [{id: 1, name: "Song 1"}, {id: 2, name: "Song 2"}]
+
+export default function BrowseScreen({ }) {
+    const Player = useContext(TrackContext)
+    const [initializing, setInitializing] = useState(true)
+    const [queuedSongs, updateTrackQueue] = useQueue()
+    const [songs, setSongs] = useState([]);
+    // const songs = []
     //Store songs array
     useEffect(() => {
         //get firebase info and store it into array
-      return () => {
+        const subscriber = firestore()
+            .collection('Songs')
+            .onSnapshot((querySnapshot) => {
+                try {
+                    querySnapshot.forEach(documentSnapshot => {
+                        songs.push({
+                            ...documentSnapshot.data(),
+                            key: documentSnapshot.id,
+                        })
+
+                    });
+                } catch (e) {
+                    console.log(e)
+                } finally {
+                    console.log(songs)
+                    setInitializing(false)
+                }
+            });
+        return () => {
+            subscriber();
+        }
+    }, [])
+
+    const handleAddSong = async (title, filename, artwork) => {
+        let song = {
+            id: new Date().valueOf(),
+            url: "",
+            title: title,
+            artwork: { uri: "" }
+        }
+        try {
+            await storage().ref(filename).getDownloadURL().then((url) => {
+                song.url = url
+
+            })
+            await storage().ref(artwork).getDownloadURL().then((url) => {
+                song.artwork.uri = url
+            })
+        } catch (e) {
+            console.log(e)
+        } finally {
+            await Player.add(song).then(async () => {
+                await updateTrackQueue()
+                console.log(queuedSongs);
+            })
+
+
+        }
 
     }
-    }, [])
-const handleAddSong = () => {
 
-}
+    if (initializing) {
+        return (<View style={{ flex: 1, backgroundColor: "#53e639" }}>
+        </View>)
+    }
 
-  return (
-    <ScrollView
-    style={{}}
-    nestedScrollEnabled
-    contentContainerStyle={styles.ccs}
->
-    {songs.map((item, index) => (
-        <Card title={item.name} onPress={handleAddSong(index)}/>
-    ))}
-</ScrollView>
-  );
+    return (
+        <ScrollView
+            style={{}}
+            nestedScrollEnabled
+            contentContainerStyle={styles.ccs}
+        >
+            {songs.map((item, index) => (
+                <Button key={index} title={item.title} onPress={async () => {
+                    handleAddSong(item.title, item.filename, item.artwork)
+                }} />
+            ))}
+        </ScrollView>
+    );
+
+
 }
 const styles = StyleSheet.create({
     body: {
