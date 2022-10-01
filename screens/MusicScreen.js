@@ -24,39 +24,44 @@ import { TrackContext } from "../component/trackContext";
 import useQueue from "../hooks/useQueue";
 const iconSize = 30;
 
-const SongLst = ({songs}) => {
+// songs.map((item, index) => (
+//     <TouchableOpacity key={index} style={{ margin: 10, }} activeOpacity={0.85} onPress={() => {
+//         Player.skip(index)
+//     }}>
+//         {/* Song Container */}
+//         <View style={styles.songContainer}>
+//             {/* Image */}
+//             <Image style={styles.songImage} source={item.artwork} />
+//             <View style={styles.songText}>
+//                 <Text>
+//                     {item.title}
+//                 </Text>
+//             </View>
+//             <View style={styles.songButtonContainer}>
+//                 <FoundationIcon name={"x"} size={iconSize} color={"white"} onPress={() => {
+//                     Player.remove(index)
+//                 }} />
+//                 <IonIcon name={"heart-outline"} size={iconSize} color={"white"} />
+//             </View>
+//         </View>
+//     </TouchableOpacity>
+// ))
+
+const SongLst = ({ songs }) => {
     const Player = useContext(TrackContext)
-    const [queuedSongs, updateTrackQueue] = useQueue()
+    const queue = Player.getQueue()
+    useEffect(() => {
+    }, [queue]);
+
     return (
-        <ScrollView
-            style={{}}
-            nestedScrollEnabled
-            contentContainerStyle={styles.ccs}
-        >
-            {queuedSongs.map((item, index) => (
-                <TouchableOpacity key={index} style={{ margin: 10, }} activeOpacity={0.85} onPress={() => {
-                    Player.skip(index)
-                }}>
-                    {/* Song Container */}
-                    <View style={styles.songContainer}>
-                        {/* Image */}
-                        <Image style={styles.songImage} source={item.artwork} />
-                        <View style={styles.songText}>
-                            <Text>
-                                {item.title}
-                            </Text>
-                        </View>
-                        <View style={styles.songButtonContainer}>
-                            <FoundationIcon name={"x"} size={iconSize} color={"white"} onPress={()=>{
-                                Player.remove(index)
-                                queuedSongs.splice(index, 1)
-                            }} />
-                            <IonIcon name={"heart-outline"} size={iconSize} color={"white"} />
-                        </View>
-                    </View>
-                </TouchableOpacity>
-            ))}
-        </ScrollView>
+        <FlatList
+            data={songs}
+            renderItem={({ item }) => (
+                <Button onPress={async () => {
+                }} title={item.title} style={{ height: 50, flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: "green" }}>
+                </Button>
+            )}
+        />
     );
 };
 
@@ -65,12 +70,10 @@ const SongLst = ({songs}) => {
 export default MusicScreen = ({ navigation }) => {
     const { position, buffered, duration } = useProgress()
     const [queuedSongs, updateTrackQueue] = useQueue()
-    // const [queuedSongs, setQueuedSongs] = useState();
     const [initializing, setInitializing] = useState(true)
     const [playing, setPlaying] = useState(false)
     const [modalOpen, setModalOpen] = useState(false)
     const [volume, setVolume] = useState()
-    // const [tracks, setTracks] = useState([])
     const [ltracks, setLTracks] = useState([])
     const isSetup = useRef(false)
     const Player = useContext(TrackContext)
@@ -93,20 +96,21 @@ export default MusicScreen = ({ navigation }) => {
         } catch (e) {
             console.log(e)
         }
-        await Player.add(song)
-        updateTrackQueue()
+        await Player.add(song).then(async () => {
+            await updateTrackQueue()
+            console.log(queuedSongs);
+        })
     }
 
     const setUpTrackPlayer = async () => {
         try {
-            await Player.setupPlayer();
-            // await Player.add(tracks);
-            // setVolume(Player.getVolume())
+            await Player.setupPlayer().then(() => {
+                isSetup.current = true;
+                setInitializing(false)
+            });
         } catch (e) {
             console.log(e)
         }
-        isSetup.current = true;
-        setInitializing(false)
     }
 
     const handlePlay = async () => {
@@ -128,22 +132,22 @@ export default MusicScreen = ({ navigation }) => {
             setUpTrackPlayer();
         }
         const subscriber = firestore()
-        .collection('Songs')
-        .onSnapshot((querySnapshot) => {
-            try {
-                querySnapshot.forEach(documentSnapshot => {
-                    ltracks.push({
-                        ...documentSnapshot.data(),
-                        key: documentSnapshot.id,
-                    })
+            .collection('Songs')
+            .onSnapshot((querySnapshot) => {
+                try {
+                    querySnapshot.forEach(documentSnapshot => {
+                        ltracks.push({
+                            ...documentSnapshot.data(),
+                            key: documentSnapshot.id,
+                        })
 
-                });
-            } catch (e) {
-                console.log(e)
-            } finally {
-                setInitializing(false)
-            }
-        });
+                    });
+                } catch (e) {
+                    console.log(e)
+                } finally {
+                    setInitializing(false)
+                }
+            });
 
         return () => {
             isSetup.current = false
@@ -190,7 +194,7 @@ export default MusicScreen = ({ navigation }) => {
                     value={position}
                     onSlidingStart={() => {
                         setPlaying(false)
-                        Player.pause()   
+                        Player.pause()
                     }}
                     step={0.01}
                     onSlidingComplete={(value) => {
