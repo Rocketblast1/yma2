@@ -24,95 +24,40 @@ import { TrackContext } from "../component/trackContext";
 import useQueue from "../hooks/useQueue";
 const iconSize = 30;
 
-// songs.map((item, index) => (
-//     <TouchableOpacity key={index} style={{ margin: 10, }} activeOpacity={0.85} onPress={() => {
-//         Player.skip(index)
-//     }}>
-//         {/* Song Container */}
-//         <View style={styles.songContainer}>
-//             {/* Image */}
-//             <Image style={styles.songImage} source={item.artwork} />
-//             <View style={styles.songText}>
-//                 <Text>
-//                     {item.title}
-//                 </Text>
-//             </View>
-//             <View style={styles.songButtonContainer}>
-//                 <FoundationIcon name={"x"} size={iconSize} color={"white"} onPress={() => {
-//                     Player.remove(index)
-//                 }} />
-//                 <IonIcon name={"heart-outline"} size={iconSize} color={"white"} />
-//             </View>
-//         </View>
-//     </TouchableOpacity>
-// ))
-
 const SongLst = ({ songs }) => {
     const Player = useContext(TrackContext)
-    const queue = Player.getQueue()
-    useEffect(() => {
-    }, [queue]);
-
     return (
         <FlatList
             data={songs}
-            renderItem={({ item }) => (
-                <Button onPress={async () => {
-                }} title={item.title} style={{ height: 50, flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: "green" }}>
-                </Button>
+            renderItem={({ item, index }) => (
+                <TouchableOpacity key={index} style={{ margin: 10, }} activeOpacity={0.85} onPress={() => {
+                    Player.skip(index)
+                }}>
+                    {/* Song Container */}
+                    <View style={styles.songContainer}>
+                        {/* Image */}
+                        <Image style={styles.songImage} source={item.artwork} />
+                        <View style={styles.songText}>
+                            <Text>
+                                {item.title}
+                            </Text>
+                        </View>
+                        <View style={styles.songButtonContainer}>
+                            <FoundationIcon name={"x"} size={iconSize} color={"white"} onPress={() => {
+                                Player.remove(index)
+                            }} />
+                            <IonIcon name={"heart-outline"} size={iconSize} color={"white"} />
+                        </View>
+                    </View>
+                </TouchableOpacity>
             )}
         />
     );
 };
 
-// ------------------------TODO:
-
-export default MusicScreen = ({ navigation }) => {
+const PlayerControls = ({ Player }) => {
     const { position, buffered, duration } = useProgress()
-    const [queuedSongs, updateTrackQueue] = useQueue()
-    const [initializing, setInitializing] = useState(true)
     const [playing, setPlaying] = useState(false)
-    const [modalOpen, setModalOpen] = useState(false)
-    const [volume, setVolume] = useState()
-    const [ltracks, setLTracks] = useState([])
-    const isSetup = useRef(false)
-    const Player = useContext(TrackContext)
-
-    const queueSong = async (title, filename, artwork) => {
-        let song = {
-            id: new Date().valueOf(),
-            url: "",
-            title: title,
-            artwork: { uri: "" }
-        }
-        try {
-            await storage().ref(filename).getDownloadURL().then((url) => {
-                song.url = url
-
-            })
-            await storage().ref(artwork).getDownloadURL().then((url) => {
-                song.artwork.uri = url
-            })
-        } catch (e) {
-            console.log(e)
-        }
-        await Player.add(song).then(async () => {
-            await updateTrackQueue()
-            console.log(queuedSongs);
-        })
-    }
-
-    const setUpTrackPlayer = async () => {
-        try {
-            await Player.setupPlayer().then(() => {
-                isSetup.current = true;
-                setInitializing(false)
-            });
-        } catch (e) {
-            console.log(e)
-        }
-    }
-
     const handlePlay = async () => {
         const state = await Player.getState();
         if (state === State.Playing) {
@@ -126,35 +71,117 @@ export default MusicScreen = ({ navigation }) => {
         };
     }
 
+    return (
+        <View style={styles.playerControlsContainer}>
+            <Slider
+                style={{ height: 40, marginHorizontal: 40 }}
+                maximumValue={duration}
+                value={position}
+                onSlidingStart={() => {
+                    setPlaying(false)
+                    Player.pause()
+                }}
+                step={0.01}
+                onSlidingComplete={(value) => {
+                    Player.seekTo(value)
+                    setPlaying(true)
+                    Player.play()
+                }}
+                thumbTintColor="#53e639"
+                minimumTrackTintColor="#53e639"
+                maximumTrackTintColor="#FFFFFF"
+            />
+            <View style={{
+                flexDirection: "row",
+                marginHorizontal: 40,
+                justifyContent: "space-between"
+            }}>
+                <Text style={styles.playerTimerText}>
+                    {new Date(Math.floor(position) * 1000).toISOString().substring(14, 19)}
+                </Text>
+                <Text style={styles.playerTimerText}>
+                    {new Date(Math.floor(duration) * 1000).toISOString().substring(14, 19)}
+                </Text>
+            </View>
+            {/* Player Controls */}
+            <View style={{
+                flex: 1,
+                justifyContent: "space-evenly",
+                flexDirection: "row"
+            }}>
+                {/* Rewind Button */}
+                <TouchableOpacity activeOpacity={0.85} style={styles.playerButton} onPress={() => Player.seekTo(0)} onLongPress={() => Player.skipToPrevious()} >
+                    <IonIcon name={"ios-play-back"} size={iconSize} color={"white"} />
+                </TouchableOpacity>
+                {/* Play Button */}
+                <TouchableOpacity activeOpacity={0.85} style={styles.playerButton} onPress={handlePlay} >
+                    {playing ? <IonIcon name={"ios-pause"} size={iconSize} color={"white"} /> : <IonIcon name={"ios-play"} size={iconSize} color={"white"} />}
+                </TouchableOpacity>
+                {/* Next Button */}
+                <TouchableOpacity activeOpacity={0.85} style={styles.playerButton} onPress={() => {
+                    Player.skipToNext();
+                }}>
+                    <IonIcon name={"ios-play-forward"} size={iconSize} color={"white"} />
+                </TouchableOpacity>
+            </View>
+            <Slider
+                style={{ height: 40, marginHorizontal: 40, }}
+                value={0}
+                step={0.01}
+                onValueChange={(value) => {
+                    Player.setVolume(value)
+                }}
+                thumbTintColor="#53e639"
+                minimumTrackTintColor="#53e639"
+                maximumTrackTintColor="#FFFFFF"
+            />
+            <View style={{
+                flex: 1,
+                justifyContent: "space-between",
+                marginHorizontal: 40,
+                flexDirection: "row"
+            }}>
+                {/* Volume Buttons */}
+                <TouchableOpacity style={styles.playerButton}>
+                    <IonIcon name={"ios-volume-off"} size={iconSize} color={"white"} />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.playerButton} onPress={() => {
+                }}>
+                    <IonIcon name={"ios-volume-high"} size={iconSize} color={"white"} />
+                </TouchableOpacity>
+            </View>
+        </View>
+    )
+}
+
+// ------------------------TODO:
+
+export default MusicScreen = ({ navigation }) => {
+    const [queuedSongs, updateTrackQueue] = useQueue()
+    const [initializing, setInitializing] = useState(true)
+    const isSetup = useRef(false)
+    const Player = useContext(TrackContext)
+    const setUpTrackPlayer = async () => {
+        try {
+            await Player.setupPlayer().then(() => {
+                isSetup.current = true;
+                setInitializing(false)
+            }); 
+        } catch (e) {
+            console.log(e)
+        }
+    }
 
     useEffect(() => {
         if (!isSetup.current) {
             setUpTrackPlayer();
         }
-        const subscriber = firestore()
-            .collection('Songs')
-            .onSnapshot((querySnapshot) => {
-                try {
-                    querySnapshot.forEach(documentSnapshot => {
-                        ltracks.push({
-                            ...documentSnapshot.data(),
-                            key: documentSnapshot.id,
-                        })
-
-                    });
-                } catch (e) {
-                    console.log(e)
-                } finally {
-                    setInitializing(false)
-                }
-            });
-
+        setInitializing(false)
         return () => {
             isSetup.current = false
             Player.destroy()
-            subscriber()
         }
-    }, [isSetup])
+    }, [isSetup, queuedSongs])
 
     if (initializing) {
         return (<View style={{ flex: 1, backgroundColor: "red" }}>
@@ -169,103 +196,12 @@ export default MusicScreen = ({ navigation }) => {
             blurRadius={6}>
             {/* Queue */}
             <View style={styles.queueContainer}>
-                <View >
-                    {/* Song Selection Area */}
-                    <FlatList
-                        data={ltracks}
-                        horizontal={true}
-                        renderItem={({ item }) => (
-                            <Button onPress={async () => {
-                                queueSong(item.title, item.filename, item.artwork)
-                            }} title={item.title} style={{ height: 50, flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: "green" }}>
-                            </Button>
-                        )}
-                    />
-                </View>
                 {queuedSongs ? (<SongLst songs={queuedSongs} />) : (<></>)}
             </View>
             <Button title="Browse Music" onPress={() => {
-                navigation.navigate("BrowseScreen")
+                navigation.navigate("BrowseScreen", { queuedSongs, updateTrackQueue })
             }} />
-            <View style={styles.playerControlsContainer}>
-                <Slider
-                    style={{ height: 40, marginHorizontal: 40 }}
-                    maximumValue={duration}
-                    value={position}
-                    onSlidingStart={() => {
-                        setPlaying(false)
-                        Player.pause()
-                    }}
-                    step={0.01}
-                    onSlidingComplete={(value) => {
-                        Player.seekTo(value)
-                        setPlaying(true)
-                        Player.play()
-                    }}
-                    thumbTintColor="#53e639"
-                    minimumTrackTintColor="#53e639"
-                    maximumTrackTintColor="#FFFFFF"
-                />
-                <View style={{
-                    flexDirection: "row",
-                    marginHorizontal: 40,
-                    justifyContent: "space-between"
-                }}>
-                    <Text style={styles.playerTimerText}>
-                        {new Date(Math.floor(position) * 1000).toISOString().substring(14, 19)}
-                    </Text>
-                    <Text style={styles.playerTimerText}>
-                        {new Date(Math.floor(duration) * 1000).toISOString().substring(14, 19)}
-                    </Text>
-                </View>
-                {/* Player Controls */}
-                <View style={{
-                    flex: 1,
-                    justifyContent: "space-evenly",
-                    flexDirection: "row"
-                }}>
-                    {/* Rewind Button */}
-                    <TouchableOpacity activeOpacity={0.85} style={styles.playerButton} onPress={() => Player.seekTo(0)} onLongPress={() => Player.skipToPrevious()} >
-                        <IonIcon name={"ios-play-back"} size={iconSize} color={"white"} />
-                    </TouchableOpacity>
-                    {/* Play Button */}
-                    <TouchableOpacity activeOpacity={0.85} style={styles.playerButton} onPress={handlePlay} >
-                        {playing ? <IonIcon name={"ios-pause"} size={iconSize} color={"white"} /> : <IonIcon name={"ios-play"} size={iconSize} color={"white"} />}
-                    </TouchableOpacity>
-                    {/* Next Button */}
-                    <TouchableOpacity activeOpacity={0.85} style={styles.playerButton} onPress={() => {
-                        Player.skipToNext();
-                    }}>
-                        <IonIcon name={"ios-play-forward"} size={iconSize} color={"white"} />
-                    </TouchableOpacity>
-                </View>
-                <Slider
-                    style={{ height: 40, marginHorizontal: 40, }}
-                    value={0}
-                    step={0.01}
-                    onValueChange={(value) => {
-                        Player.setVolume(value)
-                    }}
-                    thumbTintColor="#53e639"
-                    minimumTrackTintColor="#53e639"
-                    maximumTrackTintColor="#FFFFFF"
-                />
-                <View style={{
-                    flex: 1,
-                    justifyContent: "space-between",
-                    marginHorizontal: 40,
-                    flexDirection: "row"
-                }}>
-                    {/* Volume Buttons */}
-                    <TouchableOpacity style={styles.playerButton}>
-                        <IonIcon name={"ios-volume-off"} size={iconSize} color={"white"} />
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.playerButton} onPress={() => {
-                    }}>
-                        <IonIcon name={"ios-volume-high"} size={iconSize} color={"white"} />
-                    </TouchableOpacity>
-                </View>
-            </View>
+            <PlayerControls Player={Player} />
         </ImageBackground>
     )
 };

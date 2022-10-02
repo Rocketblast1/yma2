@@ -22,7 +22,7 @@ export default function HomeScreen() {
     {
       title: "Girl Problems",
       intro: "Why the bois need boi days",
-      uri: require("../assets/GreenhouseGaming.jpg"),
+      // uri: require("../assets/GreenhouseGaming.jpg"),
       key: "2",
     },
     {
