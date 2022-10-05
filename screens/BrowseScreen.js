@@ -16,10 +16,10 @@ import { TrackContext } from "../component/trackContext";
 import useQueue from "../hooks/useQueue";
 
 
-export default function BrowseScreen({route}) {
+export default function BrowseScreen({ route }) {
     const Player = useContext(TrackContext)
     const [initializing, setInitializing] = useState(true)
-    const {updateTrackQueue} = route.params
+    const { updateTrackQueue } = route.params
     const [songs, setSongs] = useState([]);
     // const songs = []
     //Store songs array
@@ -39,7 +39,6 @@ export default function BrowseScreen({route}) {
                 } catch (e) {
                     console.log(e)
                 } finally {
-                    console.log(songs)
                     setInitializing(false)
                 }
             });
@@ -65,10 +64,12 @@ export default function BrowseScreen({route}) {
             })
         } catch (e) {
             console.log(e)
+        } finally {
+            await Player.add(song).then(async () => {
+                await updateTrackQueue()
+            })
         }
-        await Player.add(song).then(async () => {
-            await updateTrackQueue()
-        })
+
     }
 
     if (initializing) {

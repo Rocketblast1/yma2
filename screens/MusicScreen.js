@@ -24,11 +24,12 @@ import { TrackContext } from "../component/trackContext";
 import useQueue from "../hooks/useQueue";
 const iconSize = 30;
 
-const SongLst = ({ songs }) => {
+const SongLst = ({ songs }, queue) => {
     const Player = useContext(TrackContext)
     return (
         <FlatList
             data={songs}
+            extraData={queue}
             renderItem={({ item, index }) => (
                 <TouchableOpacity key={index} style={{ margin: 10, }} activeOpacity={0.85} onPress={() => {
                     Player.skip(index)
@@ -177,6 +178,7 @@ export default MusicScreen = ({ navigation }) => {
             setUpTrackPlayer();
         }
         setInitializing(false)
+        console.log(queuedSongs);
         return () => {
             isSetup.current = false
             Player.destroy()
@@ -196,7 +198,7 @@ export default MusicScreen = ({ navigation }) => {
             blurRadius={6}>
             {/* Queue */}
             <View style={styles.queueContainer}>
-                {queuedSongs ? (<SongLst songs={queuedSongs} />) : (<></>)}
+                {queuedSongs ? (<SongLst songs={queuedSongs} queue={queuedSongs} />) : (<></>)}
             </View>
             <Button title="Browse Music" onPress={() => {
                 navigation.navigate("BrowseScreen", { queuedSongs, updateTrackQueue })
