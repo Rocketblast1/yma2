@@ -116,10 +116,10 @@ export default App = () => {
           })}
           headerMode="screen"
         >
-          {/* <Drawer.Screen name="Home" component={HomeStack} /> */}
+          <Drawer.Screen name="Home" component={HomeStack} />
           <Drawer.Screen name="Music" component={MusicStack} />
-          {/* <Drawer.Screen name="Videos" component={Videos} initialParams={{ fullscreen: fullscreen }} /> */}
-          {/* <Drawer.Screen name="Profile" component={ProfileStack} /> */}
+          <Drawer.Screen name="Videos" component={Videos} initialParams={{ fullscreen: fullscreen }} />
+          <Drawer.Screen name="Profile" component={ProfileStack} />
         </Drawer.Navigator>
       </NavigationContainer>
     </>

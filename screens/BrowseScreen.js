@@ -21,7 +21,7 @@ export default function BrowseScreen({ route }) {
     const [initializing, setInitializing] = useState(true)
     const { updateTrackQueue } = route.params
     const [songs, setSongs] = useState([]);
-    // const songs = []
+    
     //Store songs array
     useEffect(() => {
         //get firebase info and store it into array

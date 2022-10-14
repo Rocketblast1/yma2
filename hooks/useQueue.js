@@ -2,15 +2,16 @@ import TrackPlayer, { State, useProgress } from 'react-native-track-player';
 import React, { useState, useEffect, useRef } from "react";
 
 export default useQueue = () => {
-    // const [queuedSongs, setQueuedSongs] = useState([])
-    const queue = useRef([])
+    // const queue = useRef([])
+    const [queue, setQueue] = useState([]);
 
     const updateTrackQueue = async () => {
-        //  setQueuedSongs(await TrackPlayer.getQueue())
-         queue.current = (await TrackPlayer.getQueue())
-         console.log(queue.current)
+        // queue.current = (await TrackPlayer.getQueue())
+        setQueue(await TrackPlayer.getQueue())
     }
 
-    return [queue.current, updateTrackQueue]
+    // return [queue.current, updateTrackQueue]
+    return [queue, updateTrackQueue]
+
 }
 
