@@ -1,62 +1,72 @@
 import React, { useState, useEffect, useRef, useContext } from "react";
-import { Button, StyleSheet, View, ImageBackground, } from "react-native";
-import TrackPlayer, { State, useProgress } from 'react-native-track-player';
+import { Button, StyleSheet, View, ImageBackground, Text, } from "react-native";
 import storage from '@react-native-firebase/storage';
 import firestore from '@react-native-firebase/firestore';
-import { TrackContext } from "../component/trackContext";
+import { TrackContext,  } from "../component/trackContext";
 import useQueue from "../hooks/useQueue";
 import SongLst from "../component/SongLst";
 import PlayerControls from "../component/PlayerControls";
 
 export default MusicScreen = ({ navigation }) => {
-    const [queuedSongs, updateTrackQueue] = useQueue()
-    const [initializing, setInitializing] = useState(true)
-    const isSetup = useRef(false)
+    const [queuedSongs, updateTrackQueue, currentTrack] = useQueue()
+    // const [initializing, setInitializing] = useState(true)
+    // const isSetup = useRef(false)
     const Player = useContext(TrackContext)
-    const setUpTrackPlayer = async () => {
-        try {
-            await Player.setupPlayer().then(() => {
-                isSetup.current = true;
-                setInitializing(false)
-            });
-        } catch (e) {
-            console.log(e)
-        }
-    }
+    // const setUpTrackPlayer = async () => {
+    //     try {
+    //         await Player.setupPlayer().then(() => {
+    //             isSetup.current = true;
+    //             setInitializing(false)
+    //         });
+    //     } catch (e) {
+    //         console.log(e)
+    //     }
+    // }
 
     useEffect(() => {
-        if (!isSetup.current) {
-            setUpTrackPlayer();
-        }
-        setInitializing(false)
+        // if (!isSetup.current) {
+        //     setUpTrackPlayer();
+        // }
+        // setInitializing(false)
         return () => {
-            isSetup.current = false
-            Player.destroy()
+            // isSetup.current = false
+            // Player.destroy()
         }
-    }, [isSetup])
+    }, [currentTrack])
 
-    if (initializing) {
-        return (<View style={{ flex: 1, backgroundColor: "red" }}>
-        </View>)
+    // if (initializing) {
+    //     return (<View style={{ flex: 1, backgroundColor: "red" }}>
+    //     </View>)
+    // }
+
+    const RefreshImgBg = (props) => {
+        return(
+            <ImageBackground >
+                {props.children}
+            </ImageBackground>
+        )
     }
 
     return (
         <ImageBackground
             resizeMode="cover"
-            source={{ uri: "https://picsum.photos/500" }}
+            source={{uri: "https://forms.gle/BY7X15tYrHU3pJWaA"}}
             style={styles.body}
+            onLayout={() => {
+              
+            }}
             blurRadius={6}>
             {/* Queue */}
             <View style={styles.queueContainer}>
                 {queuedSongs ? (<SongLst songs={queuedSongs} update={updateTrackQueue} />) : (<></>)}
             </View>
-            <Button title="Browse Music" onPress={() => {
-                navigation.navigate("BrowseScreen", { updateTrackQueue })
-            }} />
-            <Button title="Browse Music" onPress={() => {
-                navigation.navigate("BrowseScreen", { updateTrackQueue })
-            }} />
+            <Text>
+                {JSON.stringify(currentTrack)}
+            </Text>
             <PlayerControls Player={Player} />
+            <Button title="Browse Music" onPress={() => {
+                navigation.navigate("BrowseScreen", { updateTrackQueue })
+            }} />
         </ImageBackground>
     )
 };
@@ -66,7 +76,6 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "flex-start",
         backgroundColor: "#9cf18e",
-
     },
     queueContainer: {
         flex: 2,

@@ -41,7 +41,7 @@ export default function HomeScreen() {
       data={cards}
       renderItem={({ item }) => (
         <View style={styles.tc}>
-          <Card title={item.title} intro={item.intro} source={item.uri} />
+          <Card title={item.title} intro={item.intro} />
         </View>
       )}
     />

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import {
   SafeAreaView,
   ScrollView,
@@ -34,12 +34,14 @@ import LOGIN_SIGNUP_STACK from "./stacks/ProfileStack";
 import MusicStack from "./stacks/MusicStack";
 import TrackPlayer, { State, useProgress } from 'react-native-track-player';
 
-
+//Contexts
+import { TrackContext,  } from "./component/trackContext";
 
 export default App = () => {
   const Drawer = createDrawerNavigator();
   const [initializing, setInitializing] = useState(true);
   const [user, setUser] = useState();
+  const muicPlayerIsSetup = useRef(false)
   const [fullscreen, setFullscreen] = useState();
   const { width, height } = useDimensions().screen
   const orientation = useDeviceOrientation();
@@ -52,6 +54,30 @@ export default App = () => {
       setFullscreen(false)
     }
   }
+  const isSetup = useRef(false)
+  const Player = useContext(TrackContext)
+  const setUpTrackPlayer = async () => {
+      try {
+          await Player.setupPlayer().then(() => {
+              isSetup.current = true;
+              setInitializing(false)
+          });
+      } catch (e) {
+          console.log(e)
+      }
+  }
+
+  useEffect(() => {
+      if (!isSetup.current) {
+          setUpTrackPlayer();
+      }
+      setInitializing(false)
+      return () => {
+          isSetup.current = false
+          Player.destroy()
+      }
+  }, [isSetup])
+
 
   useEffect(() => {
     const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
@@ -73,9 +99,6 @@ export default App = () => {
       <NavigationContainer style={{}}>
         <LOGIN_SIGNUP_STACK />
       </NavigationContainer>
-      // <Text>
-      //   {console.log(auth().onAuthStateChanged(onAuthStateChanged))}
-      // </Text>
     );
 
   return (
@@ -116,10 +139,10 @@ export default App = () => {
           })}
           headerMode="screen"
         >
-          <Drawer.Screen name="Home" component={HomeStack} />
+          {/* <Drawer.Screen name="Home" component={HomeStack} /> */}
           <Drawer.Screen name="Music" component={MusicStack} />
-          <Drawer.Screen name="Videos" component={Videos} initialParams={{ fullscreen: fullscreen }} />
-          <Drawer.Screen name="Profile" component={ProfileStack} />
+          {/* <Drawer.Screen name="Videos" component={Videos} initialParams={{ fullscreen: fullscreen }} /> */}
+          {/* <Drawer.Screen name="Profile" component={ProfileStack} /> */}
         </Drawer.Navigator>
       </NavigationContainer>
     </>

@@ -4,8 +4,6 @@ import {
     View,
     Text,
     FlatList,
-    ScrollView,
-    TouchableOpacity,
     Dimensions,
     Button,
 } from "react-native";
@@ -13,7 +11,10 @@ import Card from "../component/card";
 import storage from '@react-native-firebase/storage';
 import firestore from '@react-native-firebase/firestore';
 import { TrackContext } from "../component/trackContext";
-import useQueue from "../hooks/useQueue";
+import FoundationIcon from "react-native-vector-icons/Foundation";
+import IonIcon from "react-native-vector-icons/Ionicons";
+
+const iconSize = 30;
 
 
 export default function BrowseScreen({ route }) {
@@ -21,7 +22,7 @@ export default function BrowseScreen({ route }) {
     const [initializing, setInitializing] = useState(true)
     const { updateTrackQueue } = route.params
     const [songs, setSongs] = useState([]);
-    
+
     //Store songs array
     useEffect(() => {
         //get firebase info and store it into array
@@ -46,6 +47,7 @@ export default function BrowseScreen({ route }) {
             subscriber();
         }
     }, [])
+
 
     const handleAddSong = async (title, filename, artwork) => {
         let song = {
@@ -72,53 +74,34 @@ export default function BrowseScreen({ route }) {
 
     }
 
-    if (initializing) {
-        return (<View style={{ flex: 1, backgroundColor: "#53e639" }}>
-        </View>)
-    }
 
     return (
-        <ScrollView
-            style={{}}
-            nestedScrollEnabled
-            contentContainerStyle={styles.ccs}
-        >
-            {songs.map((item, index) => (
-                <Button key={index} title={item.title} onPress={async () => {
-                    handleAddSong(item.title, item.filename, item.artwork)
-                }} />
-            ))}
-        </ScrollView>
+        <FlatList
+            data={songs}
+            renderItem={({ item, index }) => (
+            
+                    <Card title={item.title} artwork={item.artwork} onPress={async () => {
+                        handleAddSong(item.title, item.filename, item.artwork)
+                    }}/> 
+            )}
+        />
+        // <ScrollView
+        //     style={{}}
+        //     nestedScrollEnabled
+        //     contentContainerStyle={styles.ccs}
+        // >
+        //     {songs.map((item, index) => (
+
+        //     ))}
+        // </ScrollView>
     );
 
 
 }
 const styles = StyleSheet.create({
-    body: {
-        flex: 1,
-        justifyContent: "flex-start",
-        backgroundColor: "#9cf18e",
 
-    },
     ccs: {
         backgroundColor: "#53e639",
-    },
-    closeModal: {
-        height: 100,
-        width: 100,
-        backgroundColor: "red"
-    },
-    playerButton: {
-        height: 50,
-        padding: 10,
-    },
-    playerControlsContainer: {
-        flex: 1,
-        filter: "blur",
-    },
-    playerTimerText: {
-        fontSize: 15,
-        flex: 0,
     },
     songContainer: {
         flex: 1,
@@ -159,9 +142,4 @@ const styles = StyleSheet.create({
         justifyContent: "space-evenly",
         flexDirection: "row"
     },
-
-    queueContainer: {
-        flex: 2,
-        maxHeight: "65%"
-    }
 });

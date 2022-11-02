@@ -1,28 +1,62 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   View,
   Text,
   TouchableOpacity,
   ImageBackground,
+  Image,
   Dimensions,
+  Button,
 } from "react-native";
-
-export default function card({ title, intro, source }) {
+import storage from '@react-native-firebase/storage';
+export default function card({ title, intro, source, artwork, onPress }) {
   const window = Dimensions.get("screen");
+  const [initializing, setInitializing] = useState(true);
+  const [url, setUrl] = useState({uri:""});
+  useEffect(() => {
+    if (artwork) {
+      let art = {uri: "" }
+      try {
+        storage().ref(artwork)
+        .getDownloadURL()
+        .then((url) => {
+          art.uri = url
+          setUrl(art)
+        })
+      } catch (e) {
+        console.log(e)
+      } finally {
+        console.log(url)
+        setInitializing(false)
+      }
+    } else {
+      setInitializing(false)
+    }
+    
+  }, []);
+
+
+  if (initializing) {
+    return (
+      <TouchableOpacity style={{ ...styles.container, backgroundColor: "red" }} >
+
+      </TouchableOpacity>
+    )
+  }
   return (
-    <TouchableOpacity style={styles.container}>
+    <TouchableOpacity style={styles.container} onPress={onPress}>
       <ImageBackground
         style={styles.imageBackground}
         ImageResizeMode={"cover"}
-        source={source}
+        source={url}
       >
         <View style={styles.content}></View>
         <View
           // colors={["rgba(0, 0, 0, 0.01)", "rgba(0, 0, 0, 0.30)"]}
           style={styles.gradient}
-          // start={[0.8, 0.3]}
-          // end={[0.46, 1.9]}
+        // start={[0.8, 0.3]}
+        // end={[0.46, 1.9]}
         >
           <Text style={styles.title}> {title} </Text>
           <Text style={styles.intro}> {intro} </Text>
